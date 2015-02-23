@@ -54,7 +54,8 @@ class MyHTMLParser(HTMLParser):
         elif tag == 'td':
             if self.column == Columns.Path:
                 self.row.append((self.path_str, self.path_params))
-                self.cell_data = None
+                self.path_str = ''
+                self.path_params = []
             else:
                 self.row.append(self.cell_data)
                 self.cell_data = None
@@ -92,9 +93,9 @@ class MyHTMLParser(HTMLParser):
 
 
 parser = MyHTMLParser()
-with open('html_sample.html') as handle:
+with open('api_reference.html') as handle:
     parser.feed(handle.read())
-pprint(parser.data)
+# pprint(parser.data)
 # print
-# for row in parser.data:
-    # print row[-1]
+for row in parser.data:
+    print row[-2][0]
