@@ -197,3 +197,34 @@ def parse(filename):
         parser.feed(handle.read())
 
     return parser.data
+
+
+def indent(text, size=4):
+    lines = text.split('\n')
+    indent = ' ' * size
+    def indent_unless_blank(line):
+        if line:
+            return indent + line
+        return ''
+
+    indented = '\n'.join(
+        indent_unless_blank(line)
+        for line in lines
+    )
+    return indented
+
+
+def render(data):
+
+    for api in data:
+        for method in api.methods():
+            print 'def {}({}):'.format(
+                api.method_name(method),
+                api.parameter_string(),
+            )
+            print indent('"""{}"""'.format(api.description_string()))
+
+
+if __name__ == '__main__':
+    data = parse('rabbit_api_reference.html')
+    render(data)
