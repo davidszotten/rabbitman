@@ -1,6 +1,16 @@
 import itertools
 from HTMLParser import HTMLParser
 from pprint import pprint
+from StringIO import StringIO
+
+from html2rest import html2rest
+
+
+def to_rst(html):
+    buf= StringIO()
+    html2rest(html, writer=buf)
+    buf.seek(0)
+    return buf.read()
 
 
 class Columns(object):
@@ -28,6 +38,16 @@ def is_single_char(part):
     return len(part) == 1
 
 
+custom_method_names = {
+    'definitions': 'set_definitions',
+    'exchanges/{vhost}/{name}/publish': 'publish',
+    'queues/{vhost}/{name}/actions': 'do_action',
+    'queues/{vhost}/{name}/get': 'get_messages',
+    'bindings/{vhost}/e/{exchange}/q/{queue}': 'bind_exchange_to_queue',
+    'bindings/{vhost}/e/{source}/e/{destination}': 'bind_exchange_to_exchange',
+}
+
+
 class ApiInfo(object):
     def __init__(self, row):
         self.method_flags = row[:4]
@@ -50,7 +70,7 @@ class ApiInfo(object):
             if is_placeholder(part)
         ]
 
-        self.description = row[5]
+        self.description = to_rst(row[5])
 
     def methods(self):
         return [
@@ -98,13 +118,19 @@ class MyHTMLParser(HTMLParser):
         if not self.seen_header:
             return
 
-        if tag == 'td':
+        if tag == 'tr':
+            self.row = []
+
+        elif tag == 'td':
             self.column = next(Columns.iterate)
             if self.column in Columns.methods:
                 self.cell_data = False
+            elif self.column == Columns.Description:
+                self.cell_data = ''
 
-        if tag == 'tr':
-            self.row = []
+        elif self.column == Columns.Description and 'td' in self.tag_stack:
+            self.cell_data += '<{}>'.format(tag)
+
 
     def handle_endtag(self, tag):
         self.tag_stack.pop()
@@ -125,6 +151,10 @@ class MyHTMLParser(HTMLParser):
                 self.row.append(self.cell_data)
                 self.cell_data = None
 
+        elif self.column == Columns.Description and 'td' in self.tag_stack:
+            self.cell_data += '</{}>'.format(tag)
+            self.row.append(self.cell_data)
+
 
     def handle_data(self, data):
         if not self.seen_header:
@@ -136,20 +166,7 @@ class MyHTMLParser(HTMLParser):
             elif self.column == Columns.Path:
                 self.handle_path_data(data)
             else:
-                self.handle_td_data(data)
-
-    def handle_td_data(self, data):
-
-        if self.tag_stack[-1] in ['pre', 'code']:
-            self.cell_data += '`{}` '.format(data)
-
-        elif self.tag_stack[-1] == 'li':
-            self.cell_data += '\n* {}'.format(data)
-
-        else:
-            if self.cell_data is None:
-                self.cell_data = ''
-            self.cell_data += ' '.join(data.split()) + ' '
+                self.cell_data += data
 
     def handle_path_data(self, data):
         if self.tag_stack[-1] == 'i':
@@ -157,7 +174,6 @@ class MyHTMLParser(HTMLParser):
             self.path_params.append(data)
         else:
             self.path_string += data
-
 
 
 parser = MyHTMLParser()
@@ -172,9 +188,9 @@ for api in parser.data:
         print api.method_name(method)
 
 
-print
-for api in parser.data:
-    if api.method_flags[-1]:
-        print '/'.join(api.path_parts)
-        print api.description
-        print
+# print
+# for api in parser.data:
+    # if api.method_flags[-1]:
+        # print '/'.join(api.path_parts)
+        # print api.description
+        # print
