@@ -105,7 +105,7 @@ class ApiInfo(object):
 
 
     def parameter_string(self):
-        return ', '.join(self.variable_path_parts)
+        return ', '.join(['self'] + self.variable_path_parts)
 
     def description_string(self):
         params = '\n'.join(
@@ -215,14 +215,20 @@ def indent(text, size=4):
 
 
 def render(data):
+    print 'class Client(object):'
 
     for api in data:
         for method in api.methods():
-            print 'def {}({}):'.format(
-                api.method_name(method),
-                api.parameter_string(),
+            print indent(
+                'def {}({}):'.format(
+                    api.method_name(method),
+                    api.parameter_string(),
+                )
             )
-            print indent('"""{}"""'.format(api.description_string()))
+            print indent(
+                '"""{}"""'.format(api.description_string()),
+                size=8,
+            )
 
 
 if __name__ == '__main__':
