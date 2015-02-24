@@ -3,12 +3,15 @@ from HTMLParser import HTMLParser
 from pprint import pprint
 from StringIO import StringIO
 
-from html2rest import html2rest
+from html2rest import Parser
 
 
 def to_rst(html):
-    buf= StringIO()
-    html2rest(html, writer=buf)
+    buf = StringIO()
+    parser = Parser(buf, 'utf8')
+    parser.linebuffer._wrapper.width = 72 - 2*4  # will be indented two levels
+    parser.feed(html.decode('utf8'))
+    parser.close()
     buf.seek(0)
     return buf.read()
 
@@ -88,16 +91,28 @@ class ApiInfo(object):
         }
         prefix = prefixes[method]
         if self.variable_path_parts:
-            return '{}_{}_by_{}'.format(
+            name = '{}_{}_by_{}'.format(
                 prefix,
                 '_'.join(self.fixed_path_parts),
                 '_and_'.join(self.variable_path_parts),
             )
         else:
-            return '{}_{}'.format(
+            name = '{}_{}'.format(
                 prefix,
                 '_'.join(self.fixed_path_parts),
             )
+        return name.replace('-', '_')
+
+
+    def parameter_string(self):
+        return ', '.join(self.variable_path_parts)
+
+    def description_string(self):
+        params = '\n'.join(
+            ':param str {}:'.format(param)
+            for param in self.variable_path_parts
+        )
+        return '{}\n{}\n'.format(self.description, params)
 
 
 class MyHTMLParser(HTMLParser):
@@ -176,21 +191,9 @@ class MyHTMLParser(HTMLParser):
             self.path_string += data
 
 
-parser = MyHTMLParser()
-with open('rabbit_api_reference.html') as handle:
-    parser.feed(handle.read())
+def parse(filename):
+    parser = MyHTMLParser()
+    with open(filename) as handle:
+        parser.feed(handle.read())
 
-
-all_prefxies = ['get', 'create', 'delete']
-
-for api in parser.data:
-    for method in api.methods():
-        print api.method_name(method)
-
-
-# print
-# for api in parser.data:
-    # if api.method_flags[-1]:
-        # print '/'.join(api.path_parts)
-        # print api.description
-        # print
+    return parser.data
