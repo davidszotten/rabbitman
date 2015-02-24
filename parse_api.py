@@ -97,5 +97,31 @@ with open('api_reference.html') as handle:
     parser.feed(handle.read())
 # pprint(parser.data)
 # print
+
+all_prefxies = ['get', 'create', 'delete']
+
 for row in parser.data:
-    print row[-2][0]
+    url_parts = row[-2][0][5:].split('/')  # skipping /api/
+    fixed_url_parts = [p for p in url_parts if not p.startswith('{')]
+    variable_url_parts = [p[1:-1] for p in url_parts if p.startswith('{')]
+    prefixes = [
+        info[1]
+        for info in zip(row[:3], all_prefxies)
+        if info[0]
+    ]
+
+    for prefix in prefixes:
+        if variable_url_parts:
+            print '{}_{}_by_{}'.format(
+                prefix,
+                '_'.join(fixed_url_parts),
+                '_'.join(variable_url_parts),
+            )
+        else:
+            print '{}_{}'.format(
+                prefix,
+                '_'.join(fixed_url_parts),
+            )
+
+    if row[3]:
+        print '\t', row[-2][0]
