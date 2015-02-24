@@ -15,6 +15,71 @@ class Columns(object):
     iterate = itertools.cycle([GET, PUT, DELETE, POST, Path, Description])
 
 
+def is_placeholder(part):
+    return part.startswith('{') and part.endswith('}')
+
+
+def placehoholder_name(part):
+    assert is_placeholder(part)
+    return part[1:-1]
+
+
+def is_single_char(part):
+    return len(part) == 1
+
+
+class ApiInfo(object):
+    def __init__(self, row):
+        self.method_flags = row[:4]
+        (path_string, path_params) = row[4]
+        path = path_string[5:]  # skip /api/
+
+        if '\n' in path:
+            # deprecated path for definitions. ignore
+            path = path.split()[0]
+
+
+        self.path_parts = path.split('/')
+
+        self.fixed_path_parts = [
+            part for part in self.path_parts
+            if not is_placeholder(part) and not is_single_char(part)
+        ]
+        self.variable_path_parts = [
+            placehoholder_name(part) for part in self.path_parts
+            if is_placeholder(part)
+        ]
+
+        self.description = row[5]
+
+    def methods(self):
+        return [
+            method for (method, is_available) in
+            zip(Columns.methods, self.method_flags)
+            if is_available and method != Columns.POST
+        ]
+
+    def method_name(self, method):
+        prefixes = {
+            Columns.GET: 'get',
+            Columns.PUT: 'create',
+            Columns.DELETE: 'delete',
+            Columns.POST: 'set',
+        }
+        prefix = prefixes[method]
+        if self.variable_path_parts:
+            return '{}_{}_by_{}'.format(
+                prefix,
+                '_'.join(self.fixed_path_parts),
+                '_and_'.join(self.variable_path_parts),
+            )
+        else:
+            return '{}_{}'.format(
+                prefix,
+                '_'.join(self.fixed_path_parts),
+            )
+
+
 class MyHTMLParser(HTMLParser):
     def __init__(self, *args, **kwargs):
         HTMLParser.__init__(self, *args, **kwargs)
@@ -22,7 +87,7 @@ class MyHTMLParser(HTMLParser):
         self.data = []
         self.tag_stack = []
         self.cell_data = ''
-        self.path_str = ''
+        self.path_string = ''
         self.path_params = []
 
         self.column = None
@@ -49,12 +114,12 @@ class MyHTMLParser(HTMLParser):
             return
 
         if tag == 'tr':
-            self.data.append(self.row)
+            self.data.append(ApiInfo(self.row))
 
         elif tag == 'td':
             if self.column == Columns.Path:
-                self.row.append((self.path_str, self.path_params))
-                self.path_str = ''
+                self.row.append((self.path_string, self.path_params))
+                self.path_string = ''
                 self.path_params = []
             else:
                 self.row.append(self.cell_data)
@@ -78,6 +143,9 @@ class MyHTMLParser(HTMLParser):
         if self.tag_stack[-1] in ['pre', 'code']:
             self.cell_data += '`{}` '.format(data)
 
+        elif self.tag_stack[-1] == 'li':
+            self.cell_data += '\n* {}'.format(data)
+
         else:
             if self.cell_data is None:
                 self.cell_data = ''
@@ -85,43 +153,28 @@ class MyHTMLParser(HTMLParser):
 
     def handle_path_data(self, data):
         if self.tag_stack[-1] == 'i':
-            self.path_str += '{%s}' % data
+            self.path_string += '{%s}' % data
             self.path_params.append(data)
         else:
-            self.path_str += data
+            self.path_string += data
 
 
 
 parser = MyHTMLParser()
-with open('api_reference.html') as handle:
+with open('rabbit_api_reference.html') as handle:
     parser.feed(handle.read())
-# pprint(parser.data)
-# print
+
 
 all_prefxies = ['get', 'create', 'delete']
 
-for row in parser.data:
-    url_parts = row[-2][0][5:].split('/')  # skipping /api/
-    fixed_url_parts = [p for p in url_parts if not p.startswith('{')]
-    variable_url_parts = [p[1:-1] for p in url_parts if p.startswith('{')]
-    prefixes = [
-        info[1]
-        for info in zip(row[:3], all_prefxies)
-        if info[0]
-    ]
+for api in parser.data:
+    for method in api.methods():
+        print api.method_name(method)
 
-    for prefix in prefixes:
-        if variable_url_parts:
-            print '{}_{}_by_{}'.format(
-                prefix,
-                '_'.join(fixed_url_parts),
-                '_'.join(variable_url_parts),
-            )
-        else:
-            print '{}_{}'.format(
-                prefix,
-                '_'.join(fixed_url_parts),
-            )
 
-    if row[3]:
-        print '\t', row[-2][0]
+print
+for api in parser.data:
+    if api.method_flags[-1]:
+        print '/'.join(api.path_parts)
+        print api.description
+        print
