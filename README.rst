@@ -39,7 +39,6 @@ has complete support for all endpoints. We are also based on `requests` instead
 of `httplib2`, which in our experience is more stable.
 
 
-
 License
 -------
 
@@ -48,3 +47,10 @@ from documentation at
 `https://www.rabbitmq.com/management.html
 <https://github.com/rabbitmq/rabbitmq-management/blob/master/LICENSE-MPL-RabbitMQ>`_,
 licensed under the MPL.
+
+
+Todo
+----
+
+- Tests
+- Custom methods for `POST` endpoints.
