@@ -107,12 +107,25 @@ class ApiInfo(object):
     def parameter_string(self):
         return ', '.join(['self'] + self.variable_path_parts)
 
+    def request_parameters(self):
+        """arguments to self.request"""
+        parameters = []
+        for part in self.path_parts:
+            if is_placeholder(part):
+                parameters.append(placehoholder_name(part))
+            else:
+                parameters.append("'{}'".format(part))
+        return ', '.join(parameters)
+
     def description_string(self):
         params = '\n'.join(
             ':param str {}:'.format(param)
             for param in self.variable_path_parts
         )
-        return '{}\n{}\n'.format(self.description, params)
+        if params:
+            return '{}\n{}\n'.format(self.description, params)
+        else:
+            return '{}\n'.format(self.description)
 
 
 class MyHTMLParser(HTMLParser):
@@ -214,8 +227,46 @@ def indent(text, size=4):
     return indented
 
 
+preamble = '''\
+import requests
+from six.moves.urllib.parse import urlparse, quote
+
+def _quote(value):
+    return quote(value, '')
+
+
+class Client(object):
+    """RabbitMQ Management plugin api
+
+    Usage:
+        client = Client('http://localhost:15672', 'guest', guest')
+        client.get_vhosts()
+    """
+    def __init__(self, url, username, password):
+        self._base_url = '{}/api'.format(url)
+        self._session = requests.Session()
+        self._session.auth = (username, password)
+        self._session.headers['content-type'] = 'application/json'
+
+    def _build_url(self, args):
+        args = map(_quote, args)
+        return '{}/{}'.format(
+            self._base_url,
+            '/'.join(args),
+        )
+
+    def request(self, method, *args, **kwargs):
+        url = self._build_url(args)
+        result = self._session.request(method, url, **kwargs)
+        result.raise_for_status()
+        if result.content:
+            return result.json()
+
+'''
+
+
 def render(data):
-    print 'class Client(object):'
+    print preamble
 
     for api in data:
         for method in api.methods():
@@ -229,6 +280,14 @@ def render(data):
                 '"""{}"""'.format(api.description_string()),
                 size=8,
             )
+            print indent(
+                "return self.request('{}', {})".format(
+                    method,
+                    api.request_parameters()
+                ),
+                size=8,
+            )
+            print
 
 
 if __name__ == '__main__':
