@@ -5,8 +5,6 @@ from pprint import pprint, pformat
 from StringIO import StringIO
 
 from html2rest import Parser, CODEBLOCK
-import autopep8
-from docformatter import format_code
 
 
 class Pep8Parser(Parser):
@@ -16,10 +14,8 @@ class Pep8Parser(Parser):
             try:
                 parsed = json.loads(sbuf)
                 sbuf = json.dumps(parsed, indent=4)
-                # sbuf = pformat(parsed)
             except Exception:
                 pass
-            # sbuf = autopep8.fix_code(sbuf)
             self.linebuffer.rawwrite(sbuf)
             self.linebuffer.indent(4)
         self.clear_stringbuffer()
@@ -148,7 +144,7 @@ class ApiInfo(object):
         else:
             doc = '{}\n'.format(self.description)
 
-        return format_code(unicode(doc))
+        return doc
 
 
 class MyHTMLParser(HTMLParser):
