@@ -54,7 +54,7 @@ setup(
     # What does your project relate to?
     # keywords='sample setuptools development',
 
-    packages=['rabbitman']),
+    py_modules=['rabbitman'],
 
     install_requires=['requests'],
 
