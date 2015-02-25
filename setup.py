@@ -45,24 +45,19 @@ setup(
         'Programming Language :: Python :: 2',
         # 'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        # 'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3',
         # 'Programming Language :: Python :: 3.2',
         # 'Programming Language :: Python :: 3.3',
-        # 'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.4',
     ],
 
     # What does your project relate to?
     # keywords='sample setuptools development',
 
-    # You can just specify the packages manually here if your project is
-    # simple. Or you can use find_packages().
     packages=['rabbitman']),
 
-    install_requires=[],  # requests
+    install_requires=['requests'],
 
-    # List additional groups of dependencies here (e.g. development dependencies).
-    # You can install these using the following syntax, for example:
-    # $ pip install -e .[dev,test]
     extras_require = {
         'codegen': ['html2rst'],
     },
