@@ -1,1 +1,560 @@
-/Users/david/Documents/Dropbox/scratch/rabbit_api_reference.html
+<table>
+  <tr>
+    <th>GET</th>
+    <th>PUT</th>
+    <th>DELETE</th>
+    <th>POST</th>
+    <th>Path</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/overview</td>
+    <td>Various random bits of information that describe the whole
+    system.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/cluster-name</td>
+    <td>Name identifying this RabbitMQ cluster.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/nodes</td>
+    <td>A list of nodes in the RabbitMQ cluster.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/nodes/<i>name</i></td>
+    <td>
+      An individual node in the RabbitMQ cluster. Add
+      "?memory=true" to get memory statistics, and "?binary=true"
+      to get a breakdown of binary memory use (may be expensive if
+      there are many small binaries in the system).
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/extensions</td>
+    <td>A list of extensions to the management plugin.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td>X</td>
+    <td class="path">/api/definitions<br/>
+                     /api/all-configuration <em>(deprecated)</em>
+    </td>
+    <td>
+      The server definitions - exchanges, queues, bindings, users,
+      virtual hosts, permissions and parameters. Everything apart from
+      messages. POST to upload an existing set of definitions. Note
+      that:
+      <ul>
+        <li>
+          The definitions are merged. Anything already existing on
+          the server but not in the uploaded definitions is
+          untouched.
+        </li>
+        <li>
+          Conflicting definitions on immutable objects (exchanges,
+          queues and bindings) will cause an error.
+        </li>
+        <li>
+          Conflicting definitions on mutable objects will cause
+          the object in the server to be overwritten with the
+          object from the definitions.
+        </li>
+        <li>
+          In the event of an error you will be left with a
+          part-applied set of definitions.
+        </li>
+      </ul>
+      For convenience you may upload a file from a browser to this
+      URI (i.e. you can use <code>multipart/form-data</code> as
+      well as <code>application/json</code>) in which case the
+      definitions should be uploaded as a form field named
+      "file".
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/connections</td>
+    <td>A list of all open connections.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/connections/<i>name</i></td>
+    <td>
+      An individual connection. DELETEing it will close the
+      connection. Optionally set the "X-Reason" header when
+      DELETEing to provide a reason.
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/connections/<i>name</i>/channels</td>
+    <td>
+      List of all channels for a given connection.
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/channels</td>
+    <td>A list of all open channels.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/channels/<i>channel</i></td>
+    <td>Details about an individual channel.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/consumers</td>
+    <td>A list of all consumers.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/consumers/<i>vhost</i></td>
+    <td>A list of all consumers in a given virtual host.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/exchanges</td>
+    <td>A list of all exchanges.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/exchanges/<i>vhost</i></td>
+    <td>A list of all exchanges in a given virtual host.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X</td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/exchanges/<i>vhost</i>/<i>name</i></td>
+    <td>
+      An individual exchange. To PUT an exchange, you will need a body looking something like this:
+      <pre>{"type":"direct","auto_delete":false,"durable":true,"internal":false,"arguments":{}}</pre>
+      The <code>type</code> key is mandatory; other keys are optional.
+      <p>
+        When DELETEing an exchange you can add the query string
+        parameter <code>if-unused=true</code>. This prevents the
+        delete from succeeding if the exchange is bound to a queue
+        or as a source to another exchange.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/exchanges/<i>vhost</i>/<i>name</i>/bindings/source</td>
+    <td>A list of all bindings in which a given exchange is the source.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/exchanges/<i>vhost</i>/<i>name</i>/bindings/destination</td>
+    <td>A list of all bindings in which a given exchange is the destination.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>X</td>
+    <td class="path">/api/exchanges/<i>vhost</i>/<i>name</i>/publish</td>
+    <td>
+      Publish a message to a given exchange. You will need a body
+      looking something like:
+      <pre>{"properties":{},"routing_key":"my key","payload":"my body","payload_encoding":"string"}</pre>
+      All keys are mandatory. The <code>payload_encoding</code>
+      key should be either "string" (in which case the payload
+      will be taken to be the UTF-8 encoding of the payload field)
+      or "base64" (in which case the payload field is taken to be
+      base64 encoded).<br/>
+      If the message is published successfully, the response will
+      look like:
+      <pre>{"routed": true}</pre>
+      <code>routed</code> will be true if the message was sent to
+      at least one queue.
+      <p>Please note that the publish / get paths in the HTTP API are
+      intended for injecting test messages, diagnostics etc - they do not
+      implement reliable delivery and so should be treated as a sysadmin's
+      tool rather than a general API for messaging.</p>
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/queues</td>
+    <td>A list of all queues.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/queues/<i>vhost</i></td>
+    <td>A list of all queues in a given virtual host.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X</td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/queues/<i>vhost</i>/<i>name</i></td>
+    <td>
+      An individual queue. To PUT a queue, you will need a body looking something like this:
+      <pre>{"auto_delete":false,"durable":true,"arguments":{},"node":"rabbit@smacmullen"}</pre>
+      All keys are optional.
+      <p>
+        When DELETEing a queue you can add the query string
+        parameters <code>if-empty=true</code> and /
+        or <code>if-unused=true</code>. These prevent the delete
+        from succeeding if the queue contains messages, or has
+        consumers, respectively.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/queues/<i>vhost</i>/<i>name</i>/bindings</td>
+    <td>A list of all bindings on a given queue.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/queues/<i>vhost</i>/<i>name</i>/contents</td>
+    <td>Contents of a queue. DELETE to purge. Note you can't GET this.</td>
+  </tr>
+
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>X</td>
+    <td class="path">/api/queues/<i>vhost</i>/<i>name</i>/actions</td>
+    <td>
+      Actions that can be taken on a queue. POST a body like:
+      <pre>{"action":"sync"}</pre> Currently the actions which are
+      supported are <code>sync</code> and <code>cancel_sync</code>.
+    </td>
+  </tr>
+
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>X</td>
+    <td class="path">/api/queues/<i>vhost</i>/<i>name</i>/get</td>
+    <td>
+      Get messages from a queue. (This is not an HTTP GET as it
+      will alter the state of the queue.) You should post a body looking like:
+      <pre>{"count":5,"requeue":true,"encoding":"auto","truncate":50000}</pre>
+      <ul>
+        <li><code>count</code> controls the maximum number of
+        messages to get. You may get fewer messages than this if
+        the queue cannot immediately provide them.</li>
+        <li><code>requeue</code> determines whether the messages will be
+        removed from the queue. If requeue is true they will be requeued -
+        but their <code>redelivered</code> flag will be set.</li>
+        <li><code>encoding</code> must be either "auto" (in which case the
+        payload will be returned as a string if it is valid UTF-8, and
+        base64 encoded otherwise), or "base64" (in which case the payload
+        will always be base64 encoded).</li>
+        <li>If <code>truncate</code> is present it will truncate the
+        message payload if it is larger than the size given (in bytes).</li>
+      </ul>
+      <p><code>truncate</code> is optional; all other keys are mandatory.</p>
+      <p>Please note that the publish / get paths in the HTTP API are
+      intended for injecting test messages, diagnostics etc - they do not
+      implement reliable delivery and so should be treated as a sysadmin's
+      tool rather than a general API for messaging.</p>
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/bindings</td>
+    <td>A list of all bindings.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/bindings/<i>vhost</i></td>
+    <td>A list of all bindings in a given virtual host.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td>X</td>
+    <td class="path">/api/bindings/<i>vhost</i>/e/<i>exchange</i>/q/<i>queue</i></td>
+    <td>A list of all bindings between an exchange and a
+    queue. Remember, an exchange and a queue can be bound
+    together many times! To create a new binding, POST to this
+    URI. You will need a body looking something like this:
+      <pre>{"routing_key":"my_routing_key","arguments":{}}</pre>
+      All keys are optional.
+      The response will contain a <code>Location</code> header
+      telling you the URI of your new binding.
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/bindings/<i>vhost</i>/e/<i>exchange</i>/q/<i>queue</i>/<i>props</i></td>
+    <td>An individual binding between an exchange and a queue.
+    The <i>props</i> part of the URI is a "name" for the binding
+    composed of its routing key and a hash of its arguments.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td>X</td>
+    <td class="path">/api/bindings/<i>vhost</i>/e/<i>source</i>/e/<i>destination</i></td>
+    <td>
+      A list of all bindings between two exchanges. Similar to
+      the list of all bindings between an exchange and a queue,
+      above.
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/bindings/<i>vhost</i>/e/<i>source</i>/e/<i>destination</i>/<i>props</i></td>
+    <td>
+      An individual binding between two exchanges. Similar to
+      the individual binding between an exchange and a queue,
+      above.
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/vhosts</td>
+    <td>A list of all vhosts.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X</td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/vhosts/<i>name</i></td>
+    <td>An individual virtual host. As a virtual host usually only
+    has a name, you do not need an HTTP body when PUTing one of
+    these. To enable / disable tracing, provide a body looking like:
+      <pre>{"tracing":true}</pre></td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/vhosts/<i>name</i>/permissions</td>
+    <td>A list of all permissions for a given virtual host.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/users</td>
+    <td>A list of all users.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X</td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/users/<i>name</i></td>
+    <td>An individual user. To PUT a user, you will need a body looking something like this:
+<pre>{"password":"secret","tags":"administrator"}</pre>
+or:
+<pre>{"password_hash":"2lmoth8l4H0DViLaK9Fxi6l9ds8=", "tags":"administrator"}</pre>
+    The <code>tags</code> key is mandatory. Either
+    <code>password</code> or <code>password_hash</code>
+    must be set. Setting <code>password_hash</code> to "" will ensure the
+    user cannot use a password to log in. <code>tags</code> is a
+    comma-separated list of tags for the user. Currently recognised tags
+    are "administrator", "monitoring" and "management".
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/users/<i>user</i>/permissions</td>
+    <td>A list of all permissions for a given user.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/whoami</td>
+    <td>Details of the currently authenticated user.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/permissions</td>
+    <td>A list of all permissions for all users.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X</td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/permissions/<i>vhost</i>/<i>user</i></td>
+    <td>An individual permission of a user and virtual host. To PUT a permission, you will need a body looking something like this:
+<pre>{"configure":".*","write":".*","read":".*"}</pre>
+    All keys are mandatory.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/parameters</td>
+    <td>A list of all parameters.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/parameters/<i>component</i></td>
+    <td>A list of all parameters for a given component.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/parameters/<i>component</i>/<i>vhost</i></td>
+    <td>A list of all parameters for a given component and virtual host.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X</td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/parameters/<i>component</i>/<i>vhost</i>/<i>name</i></td>
+    <td>An individual parameter. To PUT a parameter, you will need a body looking something like this:
+<pre>{"vhost": "/","component":"federation","name":"local_username","value":"guest"}</pre>
+</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/policies</td>
+    <td>A list of all policies.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/policies/<i>vhost</i></td>
+    <td>A list of all policies in a given virtual host.</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X</td>
+    <td>X</td>
+    <td></td>
+    <td class="path">/api/policies/<i>vhost</i>/<i>name</i></td>
+    <td>
+      An individual policy. To PUT a policy, you will need a body looking something like this:
+<pre>{"pattern":"^amq.", "definition": {"federation-upstream-set":"all"}, "priority":0, "apply-to": "all"}</pre>
+      <code>pattern</code> and <code>definition</code> are mandatory, <code>priority</code> and <code>apply-to</code> are optional.
+    </td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td class="path">/api/aliveness-test/<i>vhost</i></td>
+    <td>
+      Declares a test queue, then publishes and consumes a
+      message. Intended for use by monitoring tools. If everything
+      is working correctly, will return HTTP status 200 with
+      body: <pre>{"status":"ok"}</pre> Note: the test queue will
+      not be deleted (to to prevent queue churn if this is
+      repeatedly pinged).
+    </td>
+  </tr>
+</table>
