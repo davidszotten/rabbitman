@@ -6,19 +6,12 @@
 Welcome to rabbitman's documentation!
 =====================================
 
-
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-
-   rabbitman
+Python client for the RabbitMQ management api.
 
 
-Indices and tables
-==================
+API
+---
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+.. autoclass:: rabbitman.Client
+    :members:
+    :undoc-members:
