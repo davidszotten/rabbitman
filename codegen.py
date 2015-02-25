@@ -281,7 +281,7 @@ class Client(object):
             '/'.join(args),
         )
 
-    def request(self, method, *args, **kwargs):
+    def _request(self, method, *args, **kwargs):
         url = self._build_url(args)
         result = self._session.request(method, url, **kwargs)
         result.raise_for_status()
@@ -307,7 +307,7 @@ def render(data):
                 size=8,
             )
             print indent(
-                "return self.request('{}', {})".format(
+                "return self._request('{}', {})".format(
                     method,
                     api.request_parameters()
                 ),
