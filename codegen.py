@@ -247,8 +247,15 @@ def indent(text, size=4):
 
 
 preamble = '''\
+try:
+    # python 2.x
+    from urllib import quote
+except ImportError:
+    # python 3.x
+    from urllib.parse import quote
+
 import requests
-from six.moves.urllib.parse import urlparse, quote
+
 
 def _quote(value):
     return quote(value, '')
