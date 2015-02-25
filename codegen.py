@@ -1,3 +1,4 @@
+import re
 import itertools
 import json
 from HTMLParser import HTMLParser
@@ -14,6 +15,8 @@ class Pep8Parser(Parser):
             try:
                 parsed = json.loads(sbuf)
                 sbuf = json.dumps(parsed, indent=4)
+                sbuf = re.sub(r'\btrue\b', 'True', sbuf)
+                sbuf = re.sub(r'\bfalse\b', 'False', sbuf)
             except Exception:
                 pass
             self.linebuffer.rawwrite(sbuf)
