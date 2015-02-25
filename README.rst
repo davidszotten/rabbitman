@@ -19,6 +19,10 @@ Python client for the `RabbitMQ management plugin
     ]
 
 
+Complete documentation on `readthedocs
+<http://rabbitman.readthedocs.org/en/latest/>`_.
+
+
 Installing
 ----------
 
