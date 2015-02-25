@@ -2,12 +2,21 @@ Rabbitman
 =========
 
 Python client for the `RabbitMQ management plugin
-<https://www.rabbitmq.com/management.html>`_.::
+<https://www.rabbitmq.com/management.html>`_.
+
+::
 
     >>> from rabbitman import Client
     >>> client = Client('http://localhost:15672', 'guest', 'guest')
     >>> client.get_vhosts()
-    {
+    [{
+        'name': '/',
+        'messages': 48,
+        'tracing': False,
+        # ...
+    },
+    # ...
+    ]
 
 
 Installing
