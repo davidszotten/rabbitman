@@ -1,6 +1,8 @@
 .PHONY: docs
 
 code : rabbitman/client.py
+
+rabbitman/client.py : codegen.py
 	python codegen.py > rabbitman/client.py
 
 docs:
