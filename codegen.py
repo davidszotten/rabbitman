@@ -267,9 +267,11 @@ def _quote(value):
 class Client(object):
     """RabbitMQ Management plugin api
 
-    Usage:
-        client = Client('http://localhost:15672', 'guest', guest')
-        client.get_vhosts()
+    Usage::
+
+        >>> client = Client('http://localhost:15672', 'guest', 'guest')
+        >>> client.get_vhosts()
+
     """
     def __init__(self, url, username, password):
         self._base_url = '{}/api'.format(url)
