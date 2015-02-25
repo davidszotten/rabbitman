@@ -1,14 +1,35 @@
 import itertools
+import json
 from HTMLParser import HTMLParser
-from pprint import pprint
+from pprint import pprint, pformat
 from StringIO import StringIO
 
-from html2rest import Parser
+from html2rest import Parser, CODEBLOCK
+import autopep8
+from docformatter import format_code
 
+
+class Pep8Parser(Parser):
+    def end_pre(self):
+        sbuf = self.stringbuffer.getvalue()
+        if sbuf:
+            try:
+                parsed = json.loads(sbuf)
+                sbuf = json.dumps(parsed, indent=4)
+                # sbuf = pformat(parsed)
+            except Exception:
+                pass
+            # sbuf = autopep8.fix_code(sbuf)
+            self.linebuffer.rawwrite(sbuf)
+            self.linebuffer.indent(4)
+        self.clear_stringbuffer()
+        self.writeendblock()
+        #self.inblock -= 1
+        self.verbatim = False
 
 def to_rst(html):
     buf = StringIO()
-    parser = Parser(buf, 'utf8')
+    parser = Pep8Parser(buf, 'utf8')
     parser.linebuffer._wrapper.width = 72 - 2*4  # will be indented two levels
     parser.feed(html.decode('utf8'))
     parser.close()
@@ -123,9 +144,11 @@ class ApiInfo(object):
             for param in self.variable_path_parts
         )
         if params:
-            return '{}\n{}\n'.format(self.description, params)
+            doc = '{}\n{}\n'.format(self.description, params)
         else:
-            return '{}\n'.format(self.description)
+            doc = '{}\n'.format(self.description)
+
+        return format_code(unicode(doc))
 
 
 class MyHTMLParser(HTMLParser):
