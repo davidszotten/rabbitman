@@ -6,6 +6,7 @@ except ImportError:
     from urllib.parse import quote
 
 import requests
+from requests import HTTPError
 
 
 def _quote(value):
@@ -35,8 +36,9 @@ class Client(object):
         )
 
     def _request(self, method, *args, **kwargs):
+        body = kwargs.pop('body', None)
         url = self._build_url(args)
-        result = self._session.request(method, url, **kwargs)
+        result = self._session.request(method, url, json=body)
         result.raise_for_status()
         if result.content:
             return result.json()
@@ -55,11 +57,11 @@ class Client(object):
         """
         return self._request('GET', 'cluster-name')
 
-    def create_cluster_name(self):
+    def create_cluster_name(self, cluster_name):
         """Name identifying this RabbitMQ cluster.
 
         """
-        return self._request('PUT', 'cluster-name')
+        return self._request('PUT', 'cluster-name', body=cluster_name)
 
     def get_nodes(self):
         """A list of nodes in the RabbitMQ cluster.
@@ -186,7 +188,7 @@ class Client(object):
         """
         return self._request('GET', 'exchanges', vhost, name)
 
-    def create_exchanges_by_vhost_and_name(self, vhost, name):
+    def create_exchanges_by_vhost_and_name(self, vhost, name, exchange):
         """An individual exchange. To PUT an exchange, you will need a body
         looking something like this:
 
@@ -205,7 +207,7 @@ class Client(object):
         :param str vhost:
         :param str name:
         """
-        return self._request('PUT', 'exchanges', vhost, name)
+        return self._request('PUT', 'exchanges', vhost, name, body=exchange)
 
     def delete_exchanges_by_vhost_and_name(self, vhost, name):
         """An individual exchange. To PUT an exchange, you will need a body
@@ -278,7 +280,7 @@ class Client(object):
         """
         return self._request('GET', 'queues', vhost, name)
 
-    def create_queues_by_vhost_and_name(self, vhost, name):
+    def create_queues_by_vhost_and_name(self, vhost, name, queue):
         """An individual queue. To PUT a queue, you will need a body
         looking something like this:
 
@@ -296,7 +298,7 @@ class Client(object):
         :param str vhost:
         :param str name:
         """
-        return self._request('PUT', 'queues', vhost, name)
+        return self._request('PUT', 'queues', vhost, name, body=queue)
 
     def delete_queues_by_vhost_and_name(self, vhost, name):
         """An individual queue. To PUT a queue, you will need a body
@@ -507,7 +509,7 @@ class Client(object):
         """
         return self._request('GET', 'users', name)
 
-    def create_users_by_name(self, name):
+    def create_users_by_name(self, name, user):
         """An individual user. To PUT a user, you will need a body looking
         something like this:
 
@@ -522,7 +524,7 @@ class Client(object):
 
         :param str name:
         """
-        return self._request('PUT', 'users', name)
+        return self._request('PUT', 'users', name, body=user)
 
     def delete_users_by_name(self, name):
         """An individual user. To PUT a user, you will need a body looking
@@ -579,7 +581,7 @@ class Client(object):
         """
         return self._request('GET', 'permissions', vhost, user)
 
-    def create_permissions_by_vhost_and_user(self, vhost, user):
+    def create_permissions_by_vhost_and_user(self, vhost, user, permission):
         """An individual permission of a user and virtual host. To PUT a
         permission, you will need a body looking something like this:
 
@@ -596,7 +598,7 @@ class Client(object):
         :param str vhost:
         :param str user:
         """
-        return self._request('PUT', 'permissions', vhost, user)
+        return self._request('PUT', 'permissions', vhost, user, body=permission)
 
     def delete_permissions_by_vhost_and_user(self, vhost, user):
         """An individual permission of a user and virtual host. To PUT a
@@ -659,7 +661,7 @@ class Client(object):
         """
         return self._request('GET', 'parameters', component, vhost, name)
 
-    def create_parameters_by_component_and_vhost_and_name(self, component, vhost, name):
+    def create_parameters_by_component_and_vhost_and_name(self, component, vhost, name, parameter):
         """An individual parameter. To PUT a parameter, you will need a
         body looking something like this:
 
@@ -678,7 +680,7 @@ class Client(object):
         :param str vhost:
         :param str name:
         """
-        return self._request('PUT', 'parameters', component, vhost, name)
+        return self._request('PUT', 'parameters', component, vhost, name, body=parameter)
 
     def delete_parameters_by_component_and_vhost_and_name(self, component, vhost, name):
         """An individual parameter. To PUT a parameter, you will need a
@@ -736,7 +738,7 @@ class Client(object):
         """
         return self._request('GET', 'policies', vhost, name)
 
-    def create_policies_by_vhost_and_name(self, vhost, name):
+    def create_policies_by_vhost_and_name(self, vhost, name, policy):
         """An individual policy. To PUT a policy, you will need a body
         looking something like this:
 
@@ -756,7 +758,7 @@ class Client(object):
         :param str vhost:
         :param str name:
         """
-        return self._request('PUT', 'policies', vhost, name)
+        return self._request('PUT', 'policies', vhost, name, body=policy)
 
     def delete_policies_by_vhost_and_name(self, vhost, name):
         """An individual policy. To PUT a policy, you will need a body

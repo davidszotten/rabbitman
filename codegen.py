@@ -123,11 +123,43 @@ class ApiInfo(object):
             )
         return name.replace('-', '_')
 
+    def payload_parameter(self, method):
+        if method != Columns.PUT:
+            return None
 
-    def parameter_string(self):
-        return ', '.join(['self'] + self.variable_path_parts)
+        method_name = self.method_name(method)
+        no_payload = [
+            'create_vhosts_by_name',
+        ]
+        if method_name in no_payload:
+            return
 
-    def request_parameters(self):
+        payload_param_plural = self.fixed_path_parts[0].replace('-', '_')
+
+        def singular(name):
+            special = {
+                'policies': 'policy',
+            }
+            try:
+                return special[name]
+            except KeyError:
+                pass
+
+            if name.endswith('s'):
+                return name[:-1]
+            return name
+
+        return singular(payload_param_plural)
+
+    def parameter_string(self, method):
+        parameters = ['self'] + self.variable_path_parts
+        payload_parameter = self.payload_parameter(method)
+        if payload_parameter is not None:
+            parameters.append(payload_parameter)
+
+        return ', '.join(parameters)
+
+    def request_parameters(self, method):
         """arguments to self.request"""
         parameters = []
         for part in self.path_parts:
@@ -135,6 +167,10 @@ class ApiInfo(object):
                 parameters.append(placehoholder_name(part))
             else:
                 parameters.append("'{}'".format(part))
+
+        payload_parameter = self.payload_parameter(method)
+        if payload_parameter is not None:
+            parameters.append('body={}'.format(payload_parameter))
         return ', '.join(parameters)
 
     def description_string(self):
@@ -258,6 +294,7 @@ except ImportError:
     from urllib.parse import quote
 
 import requests
+from requests import HTTPError
 
 
 def _quote(value):
@@ -287,8 +324,9 @@ class Client(object):
         )
 
     def _request(self, method, *args, **kwargs):
+        body = kwargs.pop('body', None)
         url = self._build_url(args)
-        result = self._session.request(method, url, **kwargs)
+        result = self._session.request(method, url, json=body)
         result.raise_for_status()
         if result.content:
             return result.json()
@@ -304,7 +342,7 @@ def render(data):
             print indent(
                 'def {}({}):'.format(
                     api.method_name(method),
-                    api.parameter_string(),
+                    api.parameter_string(method),
                 )
             )
             print indent(
@@ -314,7 +352,7 @@ def render(data):
             print indent(
                 "return self._request('{}', {})".format(
                     method,
-                    api.request_parameters()
+                    api.request_parameters(method)
                 ),
                 size=8,
             )
